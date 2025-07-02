@@ -19,6 +19,9 @@ def load_tokens(server_name):
         if server_name == "IND":
             with open("token_ind.json", "r") as f:
                 tokens = json.load(f)
+        elif server_name == "PK":
+            with open("token_pk.json", "r") as f:
+                tokens = json.load(f)
         elif server_name in {"BR", "US", "SAC", "NA"}:
             with open("token_br.json", "r") as f:
                 tokens = json.load(f)
@@ -124,6 +127,8 @@ def make_request(encrypt, server_name, token):
             url = "https://client.ind.freefiremobile.com/GetPlayerPersonalShow"
         elif server_name in {"BR", "US", "SAC", "NA"}:
             url = "https://client.us.freefiremobile.com/GetPlayerPersonalShow"
+        elif server_name == "PK":
+            url = "https://clientpk.freefiremobile.com/GetPlayerPersonalShow"
         else:
             url = "https://clientbp.ggblueshark.com/GetPlayerPersonalShow"
         edata = bytes.fromhex(encrypt)
@@ -142,8 +147,6 @@ def make_request(encrypt, server_name, token):
         hex_data = response.content.hex()
         binary = bytes.fromhex(hex_data)
         decode = decode_protobuf(binary)
-        if decode is None:
-            app.logger.error("Protobuf decoding returned None.")
         return decode
     except Exception as e:
         app.logger.error(f"Error in make_request: {e}")
@@ -165,6 +168,11 @@ def decode_protobuf(binary):
 def handle_requests():
     uid = request.args.get("uid")
     server_name = request.args.get("server_name", "").upper()
+    access_key = request.args.get("key")
+
+    if access_key != "grizly":
+        return jsonify({"error": "Access denied. Invalid or missing key."}), 403
+
     if not uid or not server_name:
         return jsonify({"error": "UID and server_name are required"}), 400
 
@@ -186,17 +194,14 @@ def handle_requests():
             except Exception as e:
                 raise Exception(f"Error converting 'before' protobuf to JSON: {e}")
             data_before = json.loads(jsone)
-            before_like = data_before.get('AccountInfo', {}).get('Likes', 0)
-            try:
-                before_like = int(before_like)
-            except Exception:
-                before_like = 0
-            app.logger.info(f"Likes before command: {before_like}")
+            before_like = int(data_before.get('AccountInfo', {}).get('Likes', 0))
 
             if server_name == "IND":
                 url = "https://client.ind.freefiremobile.com/LikeProfile"
             elif server_name in {"BR", "US", "SAC", "NA"}:
                 url = "https://client.us.freefiremobile.com/LikeProfile"
+            elif server_name == "PK":
+                url = "https://clientpk.freefiremobile.com/LikeProfile"
             else:
                 url = "https://clientbp.ggblueshark.com/LikeProfile"
 
@@ -205,17 +210,14 @@ def handle_requests():
             after = make_request(encrypted_uid, server_name, token)
             if after is None:
                 raise Exception("Failed to retrieve player info after like requests.")
-            try:
-                jsone_after = MessageToJson(after)
-            except Exception as e:
-                raise Exception(f"Error converting 'after' protobuf to JSON: {e}")
+            jsone_after = MessageToJson(after)
             data_after = json.loads(jsone_after)
             after_like = int(data_after.get('AccountInfo', {}).get('Likes', 0))
             player_uid = int(data_after.get('AccountInfo', {}).get('UID', 0))
             player_name = str(data_after.get('AccountInfo', {}).get('PlayerNickname', ''))
             like_given = after_like - before_like
             status = 1 if like_given != 0 else 2
-            result = {
+            return {
                 "LikesGivenByAPI": like_given,
                 "LikesbeforeCommand": before_like,
                 "LikesafterCommand": after_like,
@@ -223,7 +225,6 @@ def handle_requests():
                 "UID": player_uid,
                 "status": status
             }
-            return result
 
         result = process_request()
         return jsonify(result)
