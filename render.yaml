@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: ff-like-api
+    env: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "gunicorn wsgi:app"
+    envVars:
+      - key: ACCESS_KEY
+        sync: false
+      - key: PYTHON_VERSION
+        value: 3.8.18
