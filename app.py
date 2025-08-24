@@ -11,11 +11,12 @@ import like_pb2
 import like_count_pb2
 import uid_generator_pb2
 from google.protobuf.message import DecodeError
+import os  
 
 app = Flask(__name__)
 
 def load_tokens(server_name):
-    # Base URL for your GitHub repository
+    # Base URL for your Tokens
     base_url = "https://raw.githubusercontent.com/SaeedX302/FF-Tokens/main/"
     
     # Map server names to their respective token file names
@@ -184,7 +185,9 @@ def handle_requests():
     server_name = request.args.get("server_name", "").upper()
     access_key = request.args.get("key")
 
-    if access_key != "tsun":
+    SECRET_KEY = os.environ.get('ACCESS_KEY')
+
+    if not SECRET_KEY or access_key != SECRET_KEY:
         return jsonify({"error": "Access denied. Invalid or missing key."}), 403
 
     if not uid or not server_name:
@@ -195,6 +198,7 @@ def handle_requests():
             tokens = load_tokens(server_name)
             if tokens is None:
                 raise Exception("Failed to load tokens.")
+            # Use the first token for checking likes, can be any valid token
             token = tokens[0]['token']
             encrypted_uid = enc(uid)
             if encrypted_uid is None:
@@ -232,9 +236,9 @@ def handle_requests():
             like_given = after_like - before_like
             status = 1 if like_given != 0 else 2
             return {
-                "LikesGivenByAPI": like_given,
-                "LikesbeforeCommand": before_like,
-                "LikesafterCommand": after_like,
+                "LikesGivenByTSun": like_given,
+                "Likesbefore": before_like,
+                "Likesafter": after_like,
                 "PlayerNickname": player_name,
                 "UID": player_uid,
                 "status": status
