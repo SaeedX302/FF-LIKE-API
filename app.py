@@ -67,7 +67,7 @@ async def send_request(encrypted_uid, token, url):
             'Expect': "100-continue",
             'X-Unity-Version': "2018.4.11f1",
             'X-GA': "v1 1",
-            'ReleaseVersion': "OB49"
+            'ReleaseVersion': "OB50"
         }
         async with aiohttp.ClientSession() as session:
             async with session.post(url, data=edata, headers=headers) as response:
@@ -141,7 +141,7 @@ def make_request(encrypt, server_name, token):
             'Expect': "100-continue",
             'X-Unity-Version': "2018.4.11f1",
             'X-GA': "v1 1",
-            'ReleaseVersion': "OB49"
+            'ReleaseVersion': "OB50"
         }
         response = requests.post(url, data=edata, headers=headers, verify=False)
         hex_data = response.content.hex()
@@ -170,7 +170,7 @@ def handle_requests():
     server_name = request.args.get("server_name", "").upper()
     access_key = request.args.get("key")
 
-    if access_key != "grizly":
+    if access_key != "tsun":
         return jsonify({"error": "Access denied. Invalid or missing key."}), 403
 
     if not uid or not server_name:
