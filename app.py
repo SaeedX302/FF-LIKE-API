@@ -15,23 +15,37 @@ from google.protobuf.message import DecodeError
 app = Flask(__name__)
 
 def load_tokens(server_name):
+    # Base URL for your GitHub repository
+    base_url = "https://raw.githubusercontent.com/SaeedX302/FF-Tokens/main/"
+    
+    # Map server names to their respective token file names
+    server_map = {
+        "IND": "token_ind.json",
+        "PK": "token_pk.json",
+        "BR": "token_br.json",
+        "US": "token_br.json", # Using BR tokens for US, SAC, NA as in original code
+        "SAC": "token_br.json",
+        "NA": "token_br.json",
+        # Default to BD tokens if server_name doesn't match
+    }
+    
+    # Get the token file name, default to token_bd.json
+    token_file = server_map.get(server_name, "token_bd.json")
+    url = f"{base_url}{token_file}"
+    
     try:
-        if server_name == "IND":
-            with open("token_ind.json", "r") as f:
-                tokens = json.load(f)
-        elif server_name == "PK":
-            with open("token_pk.json", "r") as f:
-                tokens = json.load(f)
-        elif server_name in {"BR", "US", "SAC", "NA"}:
-            with open("token_br.json", "r") as f:
-                tokens = json.load(f)
-        else:
-            with open("token_bd.json", "r") as f:
-                tokens = json.load(f)
+        # Fetch the tokens from the GitHub URL
+        response = requests.get(url)
+        response.raise_for_status()  # Raise an exception for bad status codes (4xx or 5xx)
+        tokens = response.json()
         return tokens
-    except Exception as e:
-        app.logger.error(f"Error loading tokens for server {server_name}: {e}")
+    except requests.exceptions.RequestException as e:
+        app.logger.error(f"Error fetching tokens for server {server_name} from {url}: {e}")
         return None
+    except json.JSONDecodeError as e:
+        app.logger.error(f"Error decoding JSON for server {server_name} from {url}: {e}")
+        return None
+
 
 def encrypt_message(plaintext):
     try:
