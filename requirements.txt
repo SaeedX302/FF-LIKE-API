@@ -1,7 +1,8 @@
 Flask[async]
 requests
 aiohttp
+protobuf
 googleapis-common-protos
 pycryptodome
-protobuf
 Werkzeug
+gunicorn
