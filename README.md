@@ -10,8 +10,8 @@
   [![Python](https://img.shields.io/badge/Python-3.8%2B-blue?style=for-the-badge&logo=python)]()
   [![Flask](https://img.shields.io/badge/Flask-API-black?style=for-the-badge&logo=flask)]()
   [![Vercel](https://img.shields.io/badge/Deploy-Vercel-white?style=for-the-badge&logo=vercel)]()
-  [![License](https://img.shields.io/github/license/saeedx302/FF-Like-Api?style=for-the-badge)]()
-  [![Stars](https://img.shields.io/github/stars/saeedx302/FF-Like-Api?style=for-the-badge&logo=github)]()
+  [![License](https://img.shields.io/github/license/saeedx302/FF-LIKE-API?style=for-the-badge)]()
+  [![Stars](https://img.shields.io/github/stars/saeedx302/FF-LIKE-API?style=for-the-badge&logo=github)]()
 </div>
 
 ---
