@@ -43,7 +43,7 @@
 </div>
 
  ### 1. Clone this repo
-    git clone https://github.com/saeedx302/visualdane.git
+    git clone https://github.com/saeedx302/FF-LIKE-API.git
 
 ### 2. Instll dependencies
     pip install -r requirements.txt
